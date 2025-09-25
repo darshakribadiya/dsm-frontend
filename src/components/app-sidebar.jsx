@@ -49,7 +49,7 @@ export function AppSidebar({
           },
           {
             title: "Roles & Permissions",
-            url: "#",
+            url: "/dashboard/role-permissions",
           },
           {
             title: "Settings",
