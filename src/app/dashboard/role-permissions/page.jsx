@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CreateRoleSheet } from "./_components/create-role-sheet";
 import { EditableRoleName } from "./_components/editable-role-name";
+import { DeleteRoleDialog } from "./_components/delete-role-dialog";
 
 
 export default function Page() {
@@ -64,6 +65,10 @@ export default function Page() {
         }
     }
 
+    function handleRoleDeleted(roleId) {
+        setRoles((prev) => prev.filter((role) => role.id !== roleId));
+    }
+
     useEffect(() => {
         fetchRolePermission();
     }, []);
@@ -82,7 +87,8 @@ export default function Page() {
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[220px]">Role</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead>Permissions</TableHead>
+                        <TableHead className="w-[100px]">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -92,11 +98,16 @@ export default function Page() {
                                 <TableCell>
                                     <Skeleton className="h-5 w-40" />
                                 </TableCell>
-                                {Array.from({ length: Math.max(permissions.length, 4) }).map((_, cIdx) => (
-                                    <TableCell key={cIdx} className="text-center">
-                                        <Skeleton className="h-4 w-4 inline-block" />
-                                    </TableCell>
-                                ))}
+                                <TableCell>
+                                    <div className="flex flex-wrap gap-2">
+                                        {Array.from({ length: Math.max(permissions.length, 4) }).map((_, cIdx) => (
+                                            <Skeleton key={cIdx} className="h-8 w-16" />
+                                        ))}
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Skeleton className="h-8 w-8" />
+                                </TableCell>
                             </TableRow>
                         ))
                     ) : (
@@ -129,6 +140,12 @@ export default function Page() {
                                             );
                                         })}
                                     </div>
+                                </TableCell>
+                                <TableCell>
+                                    <DeleteRoleDialog
+                                        role={role}
+                                        onDeleted={handleRoleDeleted}
+                                    />
                                 </TableCell>
                             </TableRow>
                         ))
