@@ -5,18 +5,18 @@ import api from "@/lib/api";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function DeleteRoleDialog({ role, onDeleted, trigger }) {
+export function DeletePermissionDialog({ permission, onDeleted, trigger }) {
     const [loading, setLoading] = useState(false);
 
     const handleDelete = async () => {
         setLoading(true);
         try {
-            await api.delete(`/roles/${role.id}`);
-            toast.success("Role deleted successfully");
-            onDeleted(role.id);
+            await api.delete(`/permissions/${permission.id}`);
+            toast.success("Permission deleted successfully");
+            onDeleted(permission.id);
         } catch (error) {
-            console.error("Error deleting role:", error);
-            const errorMessage = error.response?.data?.message || "Failed to delete role";
+            console.error("Error deleting permission:", error);
+            const errorMessage = error.response?.data?.message || "Failed to delete permission";
             toast.error(errorMessage);
         } finally {
             setLoading(false);
@@ -30,10 +30,10 @@ export function DeleteRoleDialog({ role, onDeleted, trigger }) {
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Role</AlertDialogTitle>
+                    <AlertDialogTitle>Delete Permission</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to delete the role "{role.label || role.role_name}"?
-                        This action cannot be undone and will remove all associated permissions.
+                        Are you sure you want to delete the permission "{permission.permission_name} - {permission.action}"?
+                        This action cannot be undone and will remove the permission from all roles and users.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
