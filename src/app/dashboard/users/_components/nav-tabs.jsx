@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"; // ShadCN helper for class merging
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import InviteUserDialog from "./invite-user-dialog";
 
 const tabs = [
   { label: "All", value: "all", href: "/dashboard/users" },
@@ -42,9 +43,7 @@ export default function NavTabs() {
           );
         })}
       </div>
-      <Button>
-        Invite User
-      </Button>
+      <InviteUserDialog />
     </div>
   );
 }

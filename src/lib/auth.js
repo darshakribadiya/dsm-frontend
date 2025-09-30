@@ -25,6 +25,13 @@ export async function logout() {
 }
 
 export async function getUser() {
-  const res = await api.get("/me");
-  return res.data;
+  try {
+    const res = await api.get("/me");
+    return res.data;
+  } catch (err) {
+    Cookies.remove("token");
+    location.pathname = "/login";
+    throw err;
+    return null;
+  }
 }
