@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { getUser } from "@/lib/auth";
-import { LoadingScreen } from "../_components/loading-screen";
+import { LoadingScreen } from "@/components/loading-screen";
 
 const UserContext = createContext();
 
@@ -43,7 +43,7 @@ export function UserProvider({ children }) {
     clearUser,
   };
 
-  return <UserContext.Provider value={value}>{loading ? <LoadingScreen /> : children}</UserContext.Provider>;
+  return <UserContext.Provider value={value}>{loading ? <LoadingScreen loadingText={"Loading..."} /> : children}</UserContext.Provider>;
 }
 
 export function useUser() {

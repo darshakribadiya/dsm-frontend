@@ -5,12 +5,17 @@ import { cn } from "@/lib/utils"; // ShadCN helper for class merging
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import InviteUserDialog from "./invite-user-dialog";
+import InvitationsSheet from "./invitations-sheet";
 
 const tabs = [
   { label: "All", value: "all", href: "/dashboard/users" },
   { label: "Admin", value: "admin", href: "/dashboard/users/admin" },
   { label: "Faculty", value: "faculty", href: "/dashboard/users/faculty" },
-  { label: "Rector", value: "hostel_staff", href: "/dashboard/users/hostel-staff" },
+  {
+    label: "Rector",
+    value: "hostel_staff",
+    href: "/dashboard/users/hostel-staff",
+  },
   { label: "General", value: "general", href: "/dashboard/users/general" },
   { label: "Student", value: "student", href: "/dashboard/users/student" },
   { label: "Parent", value: "parent", href: "/dashboard/users/parent" },
@@ -43,7 +48,10 @@ export default function NavTabs() {
           );
         })}
       </div>
-      <InviteUserDialog />
+      <div className="flex gap-2">
+        <InvitationsSheet />
+        <InviteUserDialog />
+      </div>
     </div>
   );
 }
