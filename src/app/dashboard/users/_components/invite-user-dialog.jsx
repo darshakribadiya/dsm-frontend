@@ -86,7 +86,6 @@ export default function InviteUserDialog() {
   const handleOpenChange = (open) => {
     setOpen(open);
     if (!open) {
-      // Reset form when dialog closes
       reset();
     }
   };
@@ -119,17 +118,14 @@ export default function InviteUserDialog() {
             </Label>
             <div className="space-y-2">
               <Input
+                label={"Label"}
+                error={errors.email}
                 id="email"
                 type="email"
                 placeholder="colleague@company.com"
                 className="h-11"
                 {...register("email")}
               />
-              {errors.email && (
-                <p className="text-red-600 text-sm flex items-center gap-1">
-                  {errors.email.message}
-                </p>
-              )}
             </div>
           </div>
 
@@ -156,7 +152,10 @@ export default function InviteUserDialog() {
               </Select>
               {errors.roleId && (
                 <p className="text-red-600 text-sm flex items-center gap-1">
-                  {errors.roleId.message}
+                  {errors.roleId.message ===
+                  "Invalid input: expected string, received undefined"
+                    ? "Please select a role"
+                    : errors.roleId.message}
                 </p>
               )}
             </div>

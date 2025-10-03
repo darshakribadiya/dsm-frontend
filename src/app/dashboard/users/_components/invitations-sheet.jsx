@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Icon } from "@iconify/react";
+import { ConfirmRemoveDialog } from "./invite-user-remove-dialog";
 
 export default function InvitationsSheet() {
   const [invitations, setInvitations] = useState([]);
@@ -66,7 +68,10 @@ export default function InvitationsSheet() {
   return (
     <Sheet onOpenChange={(open) => open && fetchInvitations()}>
       <SheetTrigger asChild>
-        <Button variant="outline">View Invitations</Button>
+        <Button variant="outline">
+          <Icon icon="mdi:account-view" />
+          View Invitations
+        </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:w-[600px] px-4 flex flex-col">
         <SheetHeader>
@@ -135,13 +140,10 @@ export default function InvitationsSheet() {
 
                   {!invite.accepted && (
                     <div className="flex justify-end">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleCancel(invite.id)}
-                      >
-                        Cancel Invitation
-                      </Button>
+                      <ConfirmRemoveDialog
+                        userId={invite.id}
+                        onConfirm={(id) => handleCancel(id)}
+                      />
                     </div>
                   )}
                 </CardContent>
