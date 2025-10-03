@@ -29,6 +29,7 @@ export default function InvitationsSheet() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  const [open, setOpen] = useState(false);
 
   const fetchInvitations = async () => {
     setLoading(true);
@@ -58,15 +59,17 @@ export default function InvitationsSheet() {
   };
 
   useEffect(() => {
+    if (!open) return;
+
     const timeoutId = setTimeout(() => {
       fetchInvitations();
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [search, status]);
+  }, [search, status, open]);
 
   return (
-    <Sheet onOpenChange={(open) => open && fetchInvitations()}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline">
           <Icon icon="mdi:account-view" />
