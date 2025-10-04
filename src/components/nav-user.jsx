@@ -6,9 +6,9 @@ import {
   ChevronsUpDown,
   CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react";
 
+import { useUser } from "@/app/dashboard/_context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -25,27 +25,22 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { AvatarName } from "./user/avatar";
 import { logout } from "@/lib/auth";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
-import { useEffect, useState } from "react";
-import { useUser } from "@/app/dashboard/_context";
+import { AvatarName } from "./user/avatar";
 
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
-  const { setUser } = useUser();
+  const { setUser, entitlements, setEntitlements } = useUser();
   function handleLogout() {
     logout();
   }
 
   const toggleSensitiveOps = () => {
-    setUser((prevUser) => ({
-      ...prevUser,
-      entitlements: {
-        ...prevUser.entitlements,
-        isSensitiveVisible: !prevUser.entitlements.isSensitiveVisible,
-      },
+    setEntitlements((prev) => ({
+      ...prev,
+      isSensitiveVisible: !prev.isSensitiveVisible,
     }));
   };
 
@@ -99,7 +94,7 @@ export function NavUser({ user }) {
                     <div className="flex items-center justify-between w-full">
                       <Label>Secure Field</Label>
                       <Switch
-                        checked={user.entitlements.isSensitiveVisible}
+                        checked={entitlements.isSensitiveVisible}
                         onCheckedChange={toggleSensitiveOps}
                       />
                     </div>

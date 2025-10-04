@@ -1,9 +1,6 @@
 "use client";
 
-import api from "@/lib/api";
-import { useEffect, useState } from "react";
-import { DataTable } from "./_components/data-table";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,12 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { UserStatusDialog } from "./_components/user-status-dialog";
+import api from "@/lib/api";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useUser } from "../_context";
+import { DataTable } from "./_components/data-table";
+import { UserStatusDialog } from "./_components/user-status-dialog";
 
 export default function Page() {
-  const { user } = useUser();
+  const { entitlements } = useUser();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [usersList, setUsersList] = useState([]);
@@ -72,7 +72,7 @@ export default function Page() {
     return () => clearTimeout(delay);
   }, [currentPage, search, statusFilter]);
 
-  const actionColumn = user.entitlements.isSensitiveVisible && {
+  const actionColumn = entitlements.isSensitiveVisible && {
     accessorKey: "action",
     header: () => <div>Action</div>,
     cell: ({ row }) => {
@@ -120,7 +120,7 @@ export default function Page() {
         <div className="flex items-center gap-1">{row.original?.user_type}</div>
       ),
     },
-    ...(user.entitlements.isSensitiveVisible
+    ...(entitlements.isSensitiveVisible
       ? [
           {
             accessorKey: "action",

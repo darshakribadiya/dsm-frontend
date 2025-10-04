@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { login } from "@/lib/auth";
 import { cn } from "@/lib/utils";
-import { AlertCircleIcon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -21,17 +21,22 @@ const schema = z.object({
 export function LoginForm({ className, ...props }) {
   const [error, setError] = useState("");
   const router = useRouter();
-  const { register, handleSubmit, formState: { errors, isSubmitting }, } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
     resolver: zodResolver(schema),
   });
-
 
   const onSubmit = async (data) => {
     setError("");
     try {
       const res = await login(data.email, data.password);
-      toast.success(res.message)
-      router.push("/dashboard")
+      console.log(res);
+
+      toast.success(res.message);
+      router.push("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     }

@@ -3,31 +3,14 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { getUser } from "@/lib/auth";
 import { LoadingScreen } from "@/components/loading-screen";
+import { normalizeEntitlements, normalizeUser } from "./user-config";
 
 const UserContext = createContext();
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const normalizeUser = (userData) => {
-    if (!userData) return null;
-    const role = userData.role || "user";
-    const permissions = userData.permissions || [];
-    const entitlements = {
-      isSensitiveVisible: role === "admin",
-    };
-
-    return {
-      id: userData.id,
-      name: userData.name,
-      email: userData.email,
-      isAdmin: userData.user_type == "admin" ? true :false,
-      role,
-      permissions,
-      entitlements,
-    };
-  };
+const [entitlements, setEntitlements] = useState({})
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -35,6 +18,8 @@ export function UserProvider({ children }) {
         setLoading(true);
         const userData = await getUser();
         setUser(normalizeUser(userData));
+        setEntitlements(normalizeEntitlements(userData));
+
       } catch (err) {
         console.error("Error fetching user:", err);
         setUser(null);
@@ -49,7 +34,7 @@ export function UserProvider({ children }) {
   const refreshUser = async () => {
     const userData = await getUser();
     setUser(normalizeUser(userData));
-  };
+    setEntitlements(normalizeEntitlements(userData));  };
 
   const clearUser = () => {
     setUser(null);
@@ -61,6 +46,7 @@ export function UserProvider({ children }) {
     setUser,
     refreshUser,
     clearUser,
+    entitlements, setEntitlements,
   };
 
   return (
