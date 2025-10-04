@@ -14,7 +14,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUser } from "../_context";
 import { DataTable } from "./_components/data-table";
-import { UserStatusDialog } from "./_components/user-status-dialog";
+import { UserUpdateDialog } from "./_components/user-update-dialog";
+import { Icon } from "@iconify/react";
 
 export default function Page() {
   const { entitlements } = useUser();
@@ -120,6 +121,17 @@ export default function Page() {
         <div className="flex items-center gap-1">{row.original?.user_type}</div>
       ),
     },
+    {
+      accessorKey: "contact",
+      header: () => <div>Contact</div>,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          {row.original?.contact || (
+            <div className="italic text-gray-600">Not Available</div>
+          )}
+        </div>
+      ),
+    },
     ...(entitlements.isSensitiveVisible
       ? [
           {
@@ -134,23 +146,13 @@ export default function Page() {
                   setDialogOpen(true);
                 }}
               >
-                Update Status
+                <Icon icon="mdi:account-lock" />
+                Settings
               </Button>
             ),
           },
         ]
       : []),
-    {
-      accessorKey: "contact",
-      header: () => <div>Contact</div>,
-      cell: ({ row }) => (
-        <div className="flex items-center gap-1">
-          {row.original?.contact || (
-            <div className="italic text-gray-600">Not Available</div>
-          )}
-        </div>
-      ),
-    },
   ];
 
   return (
@@ -211,7 +213,7 @@ export default function Page() {
         </div>
       </div>
 
-      <UserStatusDialog
+      <UserUpdateDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         userId={selectedUserId}
