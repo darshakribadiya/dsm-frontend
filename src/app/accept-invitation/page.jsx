@@ -1,22 +1,28 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import api from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { LoadingScreen } from "@/components/loading-screen";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import api from "@/lib/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const AcceptInvitationSchema = z.object({
   name: z.string().min(1, "Name is required").max(255),
+  contact: z
+    .string()
+    .min(1, "Contact is required")
+    .regex(
+      /^(\+?\d{1,4}[- ]?)?\d{10,15}$/,
+      "Please enter a valid phone number"
+    ),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  password_confirmation: z.string().min(8),
+  password_confirmation: z.string().min(8, "Confirm password is required"),
 });
 
 const confirmSchema = AcceptInvitationSchema.refine(
@@ -40,6 +46,7 @@ export default function AcceptInvitationPage() {
     resolver: zodResolver(confirmSchema),
     defaultValues: {
       name: "",
+      contact: "",
       password: "",
       password_confirmation: "",
     },
@@ -92,7 +99,7 @@ export default function AcceptInvitationPage() {
   };
 
   if (loading) {
-    return <LoadingScreen loadingText={"Loading invitation..."} />;
+    return <LoadingScreen loadingText={"Getting things ready for you..."} />;
   }
 
   if (globalError) {
@@ -123,49 +130,39 @@ export default function AcceptInvitationPage() {
           </p>
 
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                placeholder="Full name"
-                {...form.register("name")}
-              />
-              {form.formState.errors.name && (
-                <p className="text-sm text-destructive mt-1">
-                  {form.formState.errors.name.message}
-                </p>
-              )}
-            </div>
+            <Input
+              label={"Name"}
+              id="name"
+              placeholder="Full name"
+              {...form.register("name")}
+              error={form.formState.errors.name}
+            />
 
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Password"
-                {...form.register("password")}
-              />
-              {form.formState.errors.password && (
-                <p className="text-sm text-destructive mt-1">
-                  {form.formState.errors.password.message}
-                </p>
-              )}
-            </div>
+            <Input
+              label={"Contact"}
+              id="name"
+              placeholder="+91 1234567890"
+              {...form.register("contact")}
+              error={form.formState.errors.contact}
+            />
 
-            <div>
-              <Label htmlFor="password_confirmation">Confirm Password</Label>
-              <Input
-                id="password_confirmation"
-                type="password"
-                placeholder="Confirm password"
-                {...form.register("password_confirmation")}
-              />
-              {form.formState.errors.password_confirmation && (
-                <p className="text-sm text-destructive mt-1">
-                  {form.formState.errors.password_confirmation.message}
-                </p>
-              )}
-            </div>
+            <Input
+              label={"Password"}
+              id="password"
+              type="password"
+              placeholder="Password"
+              {...form.register("password")}
+              error={form.formState.errors.password}
+            />
+
+            <Input
+              label={"Confirm Password"}
+              id="password_confirmation"
+              type="password"
+              placeholder="Confirm password"
+              {...form.register("password_confirmation")}
+              error={form.formState.errors.password_confirmation}
+            />
 
             {globalError && (
               <p className="text-sm text-destructive">{globalError}</p>

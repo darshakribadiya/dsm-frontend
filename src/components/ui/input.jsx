@@ -1,18 +1,16 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 import { Label } from "./label";
 
-function Input({
-  className,
-  type,
-  label,
-  error,
-  ...props
-}) {
+function Input({ className, type, label, error, ...props }) {
   return (
-    <>
-      {label && <Label htmlFor={label}>{label}</Label>}
+    <div>
+      {label && (
+        <Label className={"pb-2"} htmlFor={label}>
+          {label}
+        </Label>
+      )}
       <input
         type={type}
         data-slot="input"
@@ -22,10 +20,11 @@ function Input({
           "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
           className
         )}
-        {...props} />
-      {error && <p className="text-red-700 text-sm">{error.message}</p>}
-    </>
+        {...props}
+      />
+      {error && <p className="text-red-700 text-sm mt-1">{error.message}</p>}
+    </div>
   );
 }
 
-export { Input }
+export { Input };
