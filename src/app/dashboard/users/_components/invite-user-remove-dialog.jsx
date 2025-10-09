@@ -27,7 +27,7 @@ export function ConfirmRemoveDialog({ userId, onConfirm }) {
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" size="sm">
-          <Icon icon="mdi:account-remove" className="mr-2" />
+          <Icon icon="mdi:account-remove" className="mr-1" />
           Cancel Invitation
         </Button>
       </AlertDialogTrigger>
