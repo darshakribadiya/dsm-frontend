@@ -54,6 +54,10 @@ export default function Page() {
     }
   }
 
+  function handleClearSearch() {
+    setSearch("");
+  }
+
   useEffect(() => {
     const urlPage = Number(searchParams.get("page")) || 1;
     const urlSearch = searchParams.get("search") || "";
@@ -197,6 +201,9 @@ export default function Page() {
               setCurrentPage(1);
             }}
             className="w-full lg:w-md"
+            icon={"mdi:close"}
+            iconAtRight
+            onIconClick={handleClearSearch}
           />
 
           <Button

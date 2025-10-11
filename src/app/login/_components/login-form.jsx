@@ -19,6 +19,7 @@ const schema = z.object({
 });
 
 export function LoginForm({ className, ...props }) {
+  const [passwordShow, setPasswordShow] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
   const {
@@ -28,6 +29,10 @@ export function LoginForm({ className, ...props }) {
   } = useForm({
     resolver: zodResolver(schema),
   });
+
+  function handlePasswordToggle() {
+    setPasswordShow(!passwordShow);
+  }
 
   const onSubmit = async (data) => {
     setError("");
@@ -60,25 +65,26 @@ export function LoginForm({ className, ...props }) {
       </div>
 
       <div className="grid gap-6">
-        <div className="grid gap-1">
-          <Input
-            label="Email"
-            id="email"
-            type="email"
-            placeholder="m@example.com"
-            {...register("email")}
-            error={errors.email}
-          />
-        </div>
+        <Input
+          label="Email"
+          id="email"
+          type="email"
+          placeholder="m@example.com"
+          {...register("email")}
+          error={errors.email}
+        />
 
         {/* Password */}
         <div className="grid gap-1">
           <Input
             id="password"
-            type="password"
+            type={passwordShow ? "text" : "password"}
             label={"Password"}
             error={errors.password}
             {...register("password")}
+            icon={passwordShow ? "mdi:eye-off" : "mdi:eye"}
+            iconAtRight
+            onIconClick={handlePasswordToggle}
           />
           <div className="flex items-center">
             <a

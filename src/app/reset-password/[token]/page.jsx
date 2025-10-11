@@ -1,18 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { useSearchParams, useParams, useRouter } from "next/navigation";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import api from "@/lib/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import api from "@/lib/api"; // ← your axios instance
+import { z } from "zod";
 
-// ✅ Zod validation schema
 const resetPasswordSchema = z
   .object({
     email: z.string().email("Invalid email address"),
@@ -29,7 +27,8 @@ export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const emailFromUrl = searchParams.get("email") || "";
+  const emailFromUrl = searchParams.get("email");
+  if (!emailFromUrl) return null;
 
   const [loading, setLoading] = useState(false);
 
@@ -45,13 +44,13 @@ export default function ResetPasswordPage() {
   const onSubmit = async (values) => {
     setLoading(true);
     try {
-      const res = await api.post("/reset-password", {
+      const res = await api.post("/reset-password-link", {
         ...values,
         token,
       });
 
       toast.success("Password reset successfully!");
-      router.push("/sign-in");
+      // router.push("/login");
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Failed to reset password. Try again."
@@ -71,45 +70,33 @@ export default function ResetPasswordPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Email */}
             <div>
-              <Label>Email</Label>
               <Input
+                label={"Email"}
                 type="email"
                 {...form.register("email")}
                 disabled
                 className="bg-muted"
+                error={form.formState.errors.email}
               />
-              {form.formState.errors.email && (
-                <p className="text-sm text-red-500 mt-1">
-                  {form.formState.errors.email.message}
-                </p>
-              )}
             </div>
 
-            {/* Password */}
             <div>
-              <Label>New Password</Label>
-              <Input type="password" {...form.register("password")} />
-              {form.formState.errors.password && (
-                <p className="text-sm text-red-500 mt-1">
-                  {form.formState.errors.password.message}
-                </p>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <Label>Confirm Password</Label>
               <Input
+                label={"New Password"}
+                type="password"
+                {...form.register("password")}
+                error={form.formState.errors.password}
+              />
+            </div>
+
+            <div>
+              <Input
+                label={"Confirm Password"}
                 type="password"
                 {...form.register("password_confirmation")}
+                error={form.formState.errors.password_confirmation}
               />
-              {form.formState.errors.password_confirmation && (
-                <p className="text-sm text-red-500 mt-1">
-                  {form.formState.errors.password_confirmation.message}
-                </p>
-              )}
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>

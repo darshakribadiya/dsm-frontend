@@ -34,25 +34,18 @@ export function UserUpdateDialog({ open, onOpenChange, userId }) {
         api.get("/permissions"),
       ])
         .then(([userRolesPermsRes, rolesRes, permissionsRes]) => {
-          const { user, roles: userRoles, permissions: userPermissions } = userRolesPermsRes.data;
-          
-          console.log('User roles-permissions response:', userRolesPermsRes.data);
-          console.log('Available roles:', rolesRes.data.data);
-          console.log('Available permissions:', permissionsRes.data.data);
-          
+          const {
+            user,
+            roles: userRoles,
+            permissions: userPermissions,
+          } = userRolesPermsRes.data;
           setStatus(user.status ?? "active");
-          
-          // Set user's current roles (using role names)
-          setRoles(userRoles.map(role => role.name));
-          
-          // Set user's current permissions (using permission_name:action format)
+          setRoles(userRoles.map((role) => role.name));
           const allUserPermissions = userPermissions.all || [];
-          const convertedPermissions = allUserPermissions.map(perm => `${perm.name}:${perm.action}`);
+          const convertedPermissions = allUserPermissions.map(
+            (perm) => `${perm.name}:${perm.action}`
+          );
           setPermissions(convertedPermissions);
-          
-          console.log('Converted permissions:', convertedPermissions);
-          
-          // Set available roles and permissions for selection
           setRolesList(rolesRes.data.data || []);
           setPermissionsList(permissionsRes.data.data || []);
         })
@@ -73,20 +66,22 @@ export function UserUpdateDialog({ open, onOpenChange, userId }) {
     try {
       const payload = {
         status,
-        roles: roles.map(roleName => {
-          const role = rolesList.find(r => r.role_name === roleName);
-          return role ? role.id : null;
-        }).filter(id => id !== null),
-        permissions: permissions.map(permKey => {
-          const [permissionName, action] = permKey.split(':');
-          const permission = permissionsList.find(p => p.permission_name === permissionName && p.action === action);
-          return permission ? permission.id : null;
-        }).filter(id => id !== null),
+        roles: roles
+          .map((roleName) => {
+            const role = rolesList.find((r) => r.role_name === roleName);
+            return role ? role.id : null;
+          })
+          .filter((id) => id !== null),
+        permissions: permissions
+          .map((permKey) => {
+            const [permissionName, action] = permKey.split(":");
+            const permission = permissionsList.find(
+              (p) => p.permission_name === permissionName && p.action === action
+            );
+            return permission ? permission.id : null;
+          })
+          .filter((id) => id !== null),
       };
-
-      console.log('Payload being sent:', payload);
-      console.log('Current permissions state:', permissions);
-      console.log('Available permissions list:', permissionsList);
 
       const res = await api.patch(`/users/${userId}/update`, payload);
 
@@ -126,7 +121,6 @@ export function UserUpdateDialog({ open, onOpenChange, userId }) {
             </Select>
           </div>
 
-          {/* ROLES SELECT */}
           <div className="w-full">
             <label className="text-sm font-medium">Roles</label>
             <div className="border rounded-md p-3 mt-1 max-h-32 overflow-y-auto space-y-2">
@@ -158,7 +152,6 @@ export function UserUpdateDialog({ open, onOpenChange, userId }) {
             </div>
           </div>
 
-          {/* PERMISSIONS GROUPED BY MODULE */}
           <div className="w-full">
             <label className="text-sm font-medium">Permissions</label>
             <div className="border rounded-md p-3 mt-1 max-h-64 overflow-y-auto space-y-3">
@@ -205,8 +198,6 @@ export function UserUpdateDialog({ open, onOpenChange, userId }) {
               ))}
             </div>
           </div>
-
-          {/* UPDATE BUTTON */}
           <Button onClick={handleUpdate} disabled={loading} className="w-max">
             {loading ? "Updating..." : "Update"}
           </Button>
