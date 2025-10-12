@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
+import { acceptInvitation } from "@/lib/api/invitations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -81,7 +82,7 @@ export default function AcceptInvitationPage() {
   const onSubmit = async (values) => {
     setGlobalError("");
     try {
-      const res = await api.post("/accept-invitation", {
+      const res = await acceptInvitation({
         ...values,
         token,
       });

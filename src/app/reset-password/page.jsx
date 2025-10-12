@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { forgotPassword, resetPasswordOtp, sendResetOtp } from "@/lib/api/auth";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -52,12 +53,12 @@ export default function Page() {
     try {
       if (type === "otp") {
         setLoadingOtpSend(true);
-        await api.post("/send-reset-otp", values);
+        await sendResetOtp(values);
         toast.success("OTP sent to your email.");
         setOtpSent(true);
       } else {
         setLoadingLinkSend(true);
-        await api.post("/forgot-password", values);
+        await forgotPassword(values);
         toast.success("Reset password link sent to your email.");
         router.push("/login");
       }
@@ -74,7 +75,7 @@ export default function Page() {
   const handlePasswordSubmit = async (values) => {
     setLoadingPassword(true);
     try {
-      await api.post("/reset-password-otp", {
+      await resetPasswordOtp({
         email: emailForm.getValues("email"),
         otp_code: values.otp,
         password: values.password,

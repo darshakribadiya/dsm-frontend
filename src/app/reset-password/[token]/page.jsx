@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
+import { resetPasswordLink } from "@/lib/api/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -44,7 +45,7 @@ export default function ResetPasswordPage() {
   const onSubmit = async (values) => {
     setLoading(true);
     try {
-      const res = await api.post("/reset-password-link", {
+      const res = await resetPasswordLink({
         ...values,
         token,
       });
