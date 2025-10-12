@@ -201,7 +201,7 @@ export default function Page() {
               setCurrentPage(1);
             }}
             className="w-full lg:w-md"
-            icon={"mdi:close"}
+            icon={search && "mdi:close"}
             iconAtRight
             onIconClick={handleClearSearch}
           />

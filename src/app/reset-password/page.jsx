@@ -10,6 +10,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -31,7 +32,8 @@ const passwordSchema = z
 export default function Page() {
   const router = useRouter();
   const [otpSent, setOtpSent] = useState(false);
-  const [loadingEmail, setLoadingEmail] = useState(false);
+  const [loadingOtpSend, setLoadingOtpSend] = useState(false);
+  const [loadingLinkSend, setLoadingLinkSend] = useState(false);
   const [loadingPassword, setLoadingPassword] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -47,13 +49,14 @@ export default function Page() {
   });
 
   const handleEmailSubmit = async (values, type) => {
-    setLoadingEmail(true);
     try {
       if (type === "otp") {
+        setLoadingOtpSend(true);
         await api.post("/send-reset-otp", values);
         toast.success("OTP sent to your email.");
         setOtpSent(true);
       } else {
+        setLoadingLinkSend(true);
         await api.post("/forgot-password", values);
         toast.success("Reset password link sent to your email.");
         router.push("/login");
@@ -63,7 +66,8 @@ export default function Page() {
         error.response?.data?.message || "Something went wrong. Try again."
       );
     } finally {
-      setLoadingEmail(false);
+      setLoadingOtpSend(false);
+      setLoadingLinkSend(false);
     }
   };
 
@@ -102,37 +106,40 @@ export default function Page() {
               )}
               className="space-y-4"
             >
-              <Input
-                label="Email Address"
-                type="email"
-                placeholder="Enter your email"
-                {...emailForm.register("email")}
-              />
-              {emailForm.formState.errors.email && (
-                <p className="text-sm text-red-500">
-                  {emailForm.formState.errors.email.message}
-                </p>
-              )}
-
+              <div>
+                <Input
+                  label="Email Address"
+                  type="email"
+                  placeholder="Enter your email"
+                  {...emailForm.register("email")}
+                  error={emailForm.formState.errors.email}
+                />
+                <div className="flex items-center mt-1">
+                  <Link
+                    href="/login"
+                    className="ml-auto text-sm underline-offset-4 hover:underline"
+                  >
+                    Back to Login?
+                  </Link>
+                </div>
+              </div>
               <div className="flex gap-3 pt-2">
                 <Button
-                  type="button"
                   variant="outline"
-                  disabled={loadingEmail}
+                  disabled={loadingOtpSend}
                   onClick={emailForm.handleSubmit((values) =>
                     handleEmailSubmit(values, "otp")
                   )}
                 >
-                  {loadingEmail ? "Sending..." : "Send OTP"}
+                  {loadingOtpSend ? "Sending..." : "Send OTP"}
                 </Button>
                 <Button
-                  type="button"
-                  disabled={loadingEmail}
+                  disabled={loadingLinkSend}
                   onClick={emailForm.handleSubmit((values) =>
                     handleEmailSubmit(values, "link")
                   )}
                 >
-                  {loadingEmail ? "Sending..." : "Send Reset Link"}
+                  {loadingLinkSend ? "Sending..." : "Send Reset Link"}
                 </Button>
               </div>
             </form>

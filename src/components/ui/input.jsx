@@ -61,7 +61,7 @@ function IconButton({ icon, onIconClick, iconAtRight, ariaLabel }) {
         iconAtRight ? "right-2" : "left-2"
       )}
     >
-      <Icon icon={icon} className="text-xl" />
+      <Icon icon={icon} className="text-xl opacity-70" />
     </button>
   );
 }

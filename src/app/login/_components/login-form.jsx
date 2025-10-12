@@ -7,6 +7,7 @@ import { login } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircleIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -87,12 +88,12 @@ export function LoginForm({ className, ...props }) {
             onIconClick={handlePasswordToggle}
           />
           <div className="flex items-center">
-            <a
-              href="#"
+            <Link
+              href="/reset-password"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?
-            </a>
+            </Link>
           </div>
         </div>
 
