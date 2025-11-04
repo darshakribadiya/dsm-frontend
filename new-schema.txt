@@ -1,0 +1,390 @@
+Student ERP Database Schema Documentation
+
+Table of Contents:
+
+1. Overview
+2. User & Role Management
+3. Academic Structure
+4. Student Information
+5. Attendance Management
+6. Exams & Results
+7. Hostel Management
+8. Utility Tables
+9. Database Relationships
+10. Key Features
+
+Overview
+
+This is a comprehensive database schema design for a school-level Enterprise Resource Planning (ERP) system that supports:
+
+    • Multiple user roles (faculty, hostel staff, admin, general users)
+    • Students with historical records (standards, hostels, electives)
+    • Comprehensive attendance tracking (school, hostel, activity)
+    • Results management with passing marks and grades
+    • Hostel & room management
+    • Configurable standards and subjects (including electives)
+    • Permissions & audit logging
+
+User & Role Management
+
+users table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• name (VARCHAR, NOT NULL) - Full name of user
+• email (VARCHAR, UNIQUE, NOT NULL) - Email address
+• phone (VARCHAR) - Phone number
+• password_hash (VARCHAR, NOT NULL) - Hashed password
+• user_type (ENUM, NOT NULL) - faculty, hostel_staff, general, student
+• status (ENUM, NOT NULL) - active, inactive
+• created_at (TIMESTAMP) - Record creation time
+• updated_at (TIMESTAMP) - Last update time
+
+roles table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• role_name (VARCHAR(100), UNIQUE, NOT NULL) - Role name
+• label (VARCHAR, NULLABLE) - Display label
+• created_at (TIMESTAMP) - Record creation time
+• updated_at (TIMESTAMP) - Last update time
+
+permissions table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• permission_name (VARCHAR(100), NOT NULL) - Permission name
+• action (ENUM, NOT NULL) - create, read, update, delete
+• created_at (TIMESTAMP) - Record creation time
+• updated_at (TIMESTAMP) - Last update time
+• UNIQUE CONSTRAINT (permission_name, action) - Unique permission/action pair
+
+user_roles table:
+• user_id (INT, FOREIGN KEY → users.id) - User reference
+• role_id (INT, FOREIGN KEY → roles.id) - Role reference
+
+role_permissions table:
+• role_id (INT, FOREIGN KEY → roles.id) - Role reference
+• permission_id (INT, FOREIGN KEY → permissions.id) - Permission reference
+
+user_permissions table:
+• user_id (INT, FOREIGN KEY → users.id) - User reference
+• permission_id (INT, FOREIGN KEY → permissions.id) - Permission reference
+
+invitations table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• email (VARCHAR, UNIQUE, NOT NULL) - Invitee email
+• role_id (INT, FOREIGN KEY → roles.id) - Assigned role
+• token (VARCHAR, UNIQUE, NOT NULL) - Invitation token
+• expires_at (TIMESTAMP, NULLABLE) - Expiration time
+• accepted (BOOLEAN, DEFAULT FALSE) - Acceptance flag
+• invited_by (INT, FOREIGN KEY → users.id) - Inviting user
+• created_at (TIMESTAMP) - Record creation time
+• updated_at (TIMESTAMP) - Last update time
+
+password_reset_otps table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• user_id (INT, FOREIGN KEY → users.id) - User reference
+• otp_code (VARCHAR(255), NOT NULL) - One-time password
+• channel (ENUM, DEFAULT 'email') - email, sms
+• expires_at (TIMESTAMP, NOT NULL) - Expiration time
+• verified_at (TIMESTAMP, NULLABLE) - Verification time
+• attempts (TINYINT, DEFAULT 0) - Attempt count
+• max_attempts (TINYINT, DEFAULT 3) - Max allowed attempts
+• ip_address (VARCHAR(45), NULLABLE) - Request IP
+• created_at (TIMESTAMP) - Record creation time
+• updated_at (TIMESTAMP) - Last update time
+
+Academic Structure
+
+academic_sessions table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• name (VARCHAR, NOT NULL) - Session name (e.g., 2025-26)
+• start_date (DATE, NOT NULL) - Session start date
+• end_date (DATE, NOT NULL) - Session end date
+• is_active (BOOLEAN, DEFAULT FALSE) - Active session flag
+
+standards table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• name (VARCHAR, NOT NULL) - Standard name (e.g., Grade 9)
+• level (INT) - Numeric order for sorting
+
+sections table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• standard_id (INT, FOREIGN KEY → standards.id) - Standard reference
+• name (VARCHAR, NOT NULL) - Section name (e.g., A, B, C)
+• capacity (INT) - Maximum student capacity
+
+subjects table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• code (VARCHAR, UNIQUE, NOT NULL) - Subject code
+• name (VARCHAR, NOT NULL) - Subject name
+• is_elective (BOOLEAN, DEFAULT FALSE) - Elective subject flag
+
+standard_subjects table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• standard_id (INT, FOREIGN KEY → standards.id) - Standard reference
+• subject_id (INT, FOREIGN KEY → subjects.id) - Subject reference
+• compulsory (BOOLEAN, DEFAULT TRUE) - Compulsory subject flag
+
+Student Information
+
+students table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• user_id (INT, FOREIGN KEY → users.id, NULL) - User account reference
+• admission_number (VARCHAR, UNIQUE, NOT NULL) - Unique admission number
+• dob (DATE, NOT NULL) - Date of birth
+• gender (ENUM, NOT NULL) - male, female, other
+• admission_date (DATE, NOT NULL) - Date of admission
+• current_standard_id (INT, FOREIGN KEY → standards.id) - Current standard
+• current_section_id (INT, FOREIGN KEY → sections.id) - Current section
+• current_academic_session_id (INT, FOREIGN KEY → academic_sessions.id) - Current session
+• status (ENUM, NOT NULL) - active, alumni, left
+
+student_history table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• student_id (INT, FOREIGN KEY → students.id) - Student reference
+• standard_id (INT, FOREIGN KEY → standards.id) - Standard reference
+• section_id (INT, FOREIGN KEY → sections.id) - Section reference
+• academic_session_id (INT, FOREIGN KEY → academic_sessions.id) - Session reference
+• hostel_id (INT, FOREIGN KEY → hostels.id) - Hostel reference
+• start_date (DATE, NOT NULL) - History start date
+• end_date (DATE) - History end date
+• note (TEXT) - Additional notes
+
+student_electives table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• student_id (INT, FOREIGN KEY → students.id) - Student reference
+• subject_id (INT, FOREIGN KEY → subjects.id) - Subject reference
+• academic_session_id (INT, FOREIGN KEY → academic_sessions.id) - Session reference
+• status (ENUM, NOT NULL) - active, dropped
+
+student_roll_numbers table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• student_id (INT, FOREIGN KEY → students.id) - Student reference
+• academic_session_id (INT, FOREIGN KEY → academic_sessions.id) - Session reference
+• standard_id (INT, FOREIGN KEY → standards.id) - Standard reference
+• section_id (INT, FOREIGN KEY → sections.id) - Section reference
+• roll_number (VARCHAR, NULLABLE, INDEXED) - Roll number within section
+• assigned_date (DATE, NULLABLE) - Date when roll number was assigned
+• status (ENUM, DEFAULT 'active') - active, changed, archived
+• created_at (TIMESTAMP) - Record creation time
+• updated_at (TIMESTAMP) - Last update time
+• UNIQUE CONSTRAINT (academic_session_id, standard_id, section_id, roll_number) - Ensures unique roll number per section
+
+student_codes table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• student_id (INT, FOREIGN KEY → students.id) - Student reference
+• dise_code (VARCHAR, NULLABLE) - DISE code
+• gr_code (VARCHAR, NULLABLE) - GR code
+• apaar_code (VARCHAR, NULLABLE) - APAAR code
+• hospital_policy_number (VARCHAR, NULLABLE) - Hospital policy number
+• created_at (TIMESTAMP) - Record creation time
+• updated_at (TIMESTAMP) - Last update time
+
+Attendance Management
+
+activities table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• name (VARCHAR, NOT NULL) - Activity name
+• description (TEXT) - Activity description
+• activity_date (DATE, NOT NULL) - Activity date
+• location (VARCHAR) - Activity location
+
+attendance table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• student_id (INT, FOREIGN KEY → students.id) - Student reference
+• date (DATE, NOT NULL) - Attendance date
+• attendance_type (ENUM, NOT NULL) - school, hostel, activity
+• status (ENUM, NOT NULL) - present, absent, late, excused
+• activity_id (INT, FOREIGN KEY → activities.id, NULL) - Activity reference
+• recorded_by (INT, FOREIGN KEY → users.id) - Recording user
+• note (TEXT) - Additional notes
+
+Exams & Results
+
+exams table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• name (VARCHAR, NOT NULL) - Exam name (Midterm, Final, etc.)
+• term (VARCHAR, NOT NULL) - Term (e.g., Term 1)
+• academic_session_id (INT, FOREIGN KEY → academic_sessions.id) - Session reference
+• start_date (DATE, NOT NULL) - Exam start date
+• end_date (DATE, NOT NULL) - Exam end date
+• is_published (BOOLEAN, DEFAULT FALSE) - Publication status
+
+exam_subjects table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• exam_id (INT, FOREIGN KEY → exams.id) - Exam reference
+• subject_id (INT, FOREIGN KEY → subjects.id) - Subject reference
+• max_marks (DECIMAL, NOT NULL) - Maximum marks
+• passing_marks (DECIMAL, NOT NULL) - Passing marks
+• weight (DECIMAL) - Weight for GPA calculation
+
+results table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• student_id (INT, FOREIGN KEY → students.id) - Student reference
+• exam_subject_id (INT, FOREIGN KEY → exam_subjects.id) - Exam subject reference
+• marks_obtained (DECIMAL, NOT NULL) - Marks obtained
+• grade (VARCHAR) - Grade assigned
+• remarks (TEXT) - Additional remarks
+• graded_by (INT, FOREIGN KEY → users.id) - Grading user
+
+student_exam_status table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• student_id (INT, FOREIGN KEY → students.id) - Student reference
+• exam_id (INT, FOREIGN KEY → exams.id) - Exam reference
+• total_obtained (DECIMAL, NOT NULL) - Total marks obtained
+• total_max (DECIMAL, NOT NULL) - Total maximum marks
+• percentage (DECIMAL, NOT NULL) - Percentage scored
+• final_status (ENUM, NOT NULL) - pass, fail, pending
+• grade (VARCHAR) - Final grade
+
+grade_scales table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• academic_session_id (INT, FOREIGN KEY → academic_sessions.id) - Session reference
+• grade_label (VARCHAR, NOT NULL) - Grade label (A, B, C, etc.)
+• min_mark (DECIMAL, NOT NULL) - Minimum marks for grade
+• max_mark (DECIMAL, NOT NULL) - Maximum marks for grade
+• grade_point (DECIMAL, NOT NULL) - Grade point value
+
+Hostel Management
+
+hostels table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• name (VARCHAR, NOT NULL) - Hostel name
+• warden_user_id (INT, FOREIGN KEY → users.id) - Warden user reference
+• address (TEXT) - Hostel address
+
+rooms table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• hostel_id (INT, FOREIGN KEY → hostels.id) - Hostel reference
+• room_number (VARCHAR, NOT NULL) - Room number
+• capacity (INT, NOT NULL) - Room capacity
+
+student_hostel_assignments table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• student_id (INT, FOREIGN KEY → students.id) - Student reference
+• room_id (INT, FOREIGN KEY → rooms.id) - Room reference
+• start_date (DATE, NOT NULL) - Assignment start date
+• end_date (DATE) - Assignment end date
+• assigned_by (INT, FOREIGN KEY → users.id) - Assigning user
+
+Utility Tables
+
+teacher_subject_assignments table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• teacher_user_id (INT, FOREIGN KEY → users.id) - Teacher user reference
+• subject_id (INT, FOREIGN KEY → subjects.id) - Subject reference
+• standard_id (INT, FOREIGN KEY → standards.id) - Standard reference
+• start_date (DATE, NOT NULL) - Assignment start date
+• end_date (DATE) - Assignment end date
+
+attachments table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• owner_type (VARCHAR, NOT NULL) - Owner type (student, result, activity)
+• owner_id (INT, NOT NULL) - Owner record ID
+• file_key (VARCHAR, NOT NULL) - File storage key
+• mime_type (VARCHAR, NOT NULL) - File MIME type
+• file_size (BIGINT, NOT NULL) - File size in bytes
+• uploaded_by (INT, FOREIGN KEY → users.id) - Uploading user
+
+audit_logs table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• user_id (INT, FOREIGN KEY → users.id) - User reference
+• action (VARCHAR, NOT NULL) - Action performed
+• entity_type (VARCHAR, NOT NULL) - Entity type affected
+• entity_id (INT, NOT NULL) - Entity ID affected
+• metadata (JSON) - Additional metadata
+• ip_address (VARCHAR) - User IP address
+• created_at (TIMESTAMP, NOT NULL) - Action timestamp
+
+assets table:
+• id (INT, PRIMARY KEY) - Unique identifier
+• assetable_id (BIGINT, NOT NULL) - Polymorphic owner record ID
+• assetable_type (VARCHAR, NOT NULL) - Polymorphic owner type
+• document_type (ENUM, INDEXED) - aadhaar, birth_certificate, transfer_certificate, photo, id_card, mark_sheet, other
+• file_name (VARCHAR, NOT NULL) - Original file name
+• file_path (VARCHAR, NOT NULL) - Storage file path
+• mime_type (VARCHAR, NULLABLE) - File MIME type
+• uploaded_by (INT, FOREIGN KEY → users.id, NULLABLE) - Uploading user reference
+• uploaded_at (TIMESTAMP, DEFAULT CURRENT) - Upload timestamp
+• remarks (TEXT, NULLABLE) - Additional remarks
+• created_at (TIMESTAMP) - Record creation time
+• updated_at (TIMESTAMP) - Last update time
+• INDEX (assetable_id, assetable_type) - Polymorphic relationship index
+
+Database Relationships
+
+Primary Relationships:
+• Users ↔ Roles ↔ Permissions → Role-Based Access Control (RBAC) system
+• Students ↔ Standards/Sections/History → Track movement across grades/years
+• Students ↔ Subjects (Electives) → Elective subject choices
+• Attendance → Covers school, hostel, and activities
+• Exams → Exam Subjects → Results → With passing marks & final exam status
+• Hostels → Rooms → Student Assignments → Track hostel accommodation
+• Audit Logs & Attachments → Ensure traceability
+• Student Roll Numbers & Codes → Track student identification and roll numbers per session
+• Assets → Polymorphic document management for students and other entities
+
+Key Foreign Key Relationships:
+
+1. User Management:
+   • users → user_roles → roles
+   • roles → role_permissions → permissions
+   • users → user_permissions → permissions
+   • users → invitations (invited_by)
+   • invitations → roles
+
+2. Academic Structure:
+   • standards → sections
+   • standards → standard_subjects → subjects
+
+3. Student Management:
+   • students → users (optional)
+   • students → standards, sections, academic_sessions
+   • students → student_history, student_electives
+   • students → student_roll_numbers → academic_sessions, standards, sections
+   • students → student_codes
+
+4. Attendance & Activities:
+   • students → attendance
+   • activities → attendance
+
+5. Exams & Results:
+   • academic_sessions → exams
+   • exams → exam_subjects → subjects
+   • students → results → exam_subjects
+   • students → student_exam_status → exams
+
+6. Hostel Management:
+   • hostels → rooms
+   • students → student_hostel_assignments → rooms
+
+7. Asset Management:
+   • assets → users (uploaded_by)
+   • assets → assetable (polymorphic: students, results, activities, etc.)
+
+Key Features
+
+Implemented Capabilities:
+• Historical Student Progress Tracking - Class changes, hostels, electives
+• Multi-type Attendance Management - School, hostel, and activity attendance
+• Flexible Exam System - Exam-specific passing marks and grading
+• Role-Based Access Control (RBAC) - Granular permissions system
+• Hostel Management - Room assignments and tracking
+• Audit Trail - Complete action logging for compliance
+• File Management - Document and attachment handling (attachments & assets tables)
+• Student Roll Number Management - Track roll numbers per academic session, standard, and section
+• Student Code Management - Store multiple identification codes (DISE, GR, APAAR, hospital policy)
+• Polymorphic Asset Management - Flexible document storage for various entity types
+
+Extensibility:
+This schema design provides a solid foundation that can be extended to support additional modules:
+
+    • Fees Management - Payment tracking and billing
+    • Transport Management - Bus routes and student transportation
+    • Library Management - Book lending and inventory
+    • Communication System - Notifications and messaging
+    • Parent Portal - Parent access to student information
+    • Reporting & Analytics - Advanced reporting capabilities
+
+Design Benefits:
+• Scalable Architecture - Supports multiple schools and large student populations
+• Data Integrity - Comprehensive foreign key relationships and constraints
+• Flexibility - Configurable standards, subjects, and grading systems
+• Audit Compliance - Complete audit trail for all system actions
+• Multi-tenant Ready - Can be extended for multiple institution support
