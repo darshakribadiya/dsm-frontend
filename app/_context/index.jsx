@@ -1,36 +1,19 @@
 "use client";
 
 import { getUser } from "@/lib/auth/utils";
-import { useSession } from "next-auth/react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 const UserContext = createContext();
 
-export function UserProvider({ children }) {
-  const { data: session } = useSession();
-
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setLoading(true);
-        const userData = await getUser();
-        setUser(userData);
-      } catch (err) {
-        console.error("Error fetching user:", err);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    session && fetchUser();
-  }, []);
+export function UserProvider({ children, initUser }) {
+  const [user, setUser] = useState(initUser);
+  const [refreshUserLoading, setRrefreshUserLoading] = useState(false);
 
   const refreshUser = async () => {
+    setRrefreshUserLoading(true);
     const userData = await getUser();
     setUser(userData);
+    setRrefreshUserLoading(false);
   };
 
   const clearUser = () => {
@@ -39,9 +22,9 @@ export function UserProvider({ children }) {
 
   const value = {
     user,
-    loading,
     setUser,
     refreshUser,
+    refreshUserLoading,
     clearUser,
   };
 
