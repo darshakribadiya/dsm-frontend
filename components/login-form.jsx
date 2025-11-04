@@ -23,15 +23,12 @@ export function LoginForm({ className }) {
       email,
       password,
     });
-
     setSubmitting(false);
-
     if (res?.error) {
       setError("Invalid credentials");
       return;
     }
-
-    router.push("/dashboard"); // or wherever your landing page is
+    router.push("/dashboard");
   };
 
   return (
